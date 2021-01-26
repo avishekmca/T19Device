@@ -1,7 +1,5 @@
 package com.example.t19device;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -12,14 +10,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.librryt19.Commons.Commons;
 import com.example.librryt19.Conn;
@@ -30,20 +32,21 @@ import com.example.librryt19.ble.Bluetooth;
 import com.example.librryt19.qrcode.BluetoothLeService;
 import com.example.librryt19.qrcode.SampleGattAttributes;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity implements BleWrapperUiCallbacks {
-    Button button,cntct;
+public class ContactActivity extends AppCompatActivity implements BleWrapperUiCallbacks {
     Conn conn;
-    TextView dte=null;
     private Bluetooth bluetooth=null;
-    Timer timer = new Timer();
+    LinearLayout llDynamicContent;
     private final String LIST_NAME = "NAME";
     private final String LIST_UUID = "UUID";
+    Button cntct=null;
+    int j=0;
     private BluetoothLeService mBluetoothLeService;
     private ExpandableListView mGattServicesList;
     Attributes attributes=new Attributes();
@@ -53,72 +56,30 @@ public class MainActivity extends AppCompatActivity implements BleWrapperUiCallb
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.cntct);
+        cntct=findViewById(R.id.cntct);
         mGattServicesList=new ExpandableListView(this);
+        llDynamicContent = (LinearLayout) findViewById(R.id.llDynamicContent);
         bluetooth = Bluetooth.getInstance(this,
                 this);
-        Commons.bluetooth=bluetooth;
         conn=new Conn(this,"BC:33:AC:4A:AC:AF",bluetooth,attributes);
-        button=findViewById(R.id.btn);
-        cntct=findViewById(R.id.cntct);
-        dte=findViewById(R.id.dte);
-        cntct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    unbindService(mServiceConnection);
-                }
-                catch(IllegalArgumentException ex){ex.printStackTrace();}
-                finally{
-                    Intent i =new Intent(MainActivity.this,ContactActivity.class);
-                    startActivity(i);
-                }
-            }
-        });
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(Commons.hasCon){
-                    timer = new Timer(); // creating timer
-                    TimerTask task = new MyTask(); // creating timer task
-                    // scheduling the task for repeated fixed-delay execution, beginning after the specified delay
-                    timer.schedule(task, 800, 1000);
-                }
-                else{
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            WristbandUtils.toast(MainActivity.this,
-                                    "Device connection failure!"
-                            );
-                        }
-                    });
-                }
-
-            }
-        });
+        Timer timer = new Timer(); // creating timer
+        TimerTask task = new MyTask(); // creating timer task
+        // scheduling the task for repeated fixed-delay execution, beginning after the specified delay
+        timer.schedule(task, 800, 1000);
     }
-    int i = 1;
+    int i = 4;
     class MyTask extends TimerTask {
         public void run() {
             if (mGattCharacteristics != null) {
                 if (mGattCharacteristics.size() > 3) {
-                    // for(int i=1;i<4;i++) {
-                    if (i == 5) i = 1;
+                    if (i == 78) i = 4;
                     BluetoothGattCharacteristic characteristic;
-                    if (i == 1) {
-                        characteristic =
-                                mGattCharacteristics.get(3).get(0);
-                    } else {
-                        characteristic =
-                                mGattCharacteristics.get(6).get(i-1);
-                    }
-                    Log.e("count", i + "");
+                    characteristic =
+                            mGattCharacteristics.get(6).get(i);
                     i = i + 1;
                     final int charaProp = characteristic.getProperties();
                     if ((charaProp | BluetoothGattCharacteristic.PROPERTY_READ) > 0) {
-                        // If there is an active notification on a characteristic, clear
-                        // it first so it doesn't update the data field on the user interface.
                         if (mNotifyCharacteristic != null
                                 && mBluetoothLeService != null) {
                             mBluetoothLeService.setCharacteristicNotification(
@@ -136,7 +97,6 @@ public class MainActivity extends AppCompatActivity implements BleWrapperUiCallb
                                     characteristic, true);
                         }
                     }
-
                 }
             }
         }
@@ -192,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements BleWrapperUiCallb
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                WristbandUtils.toast(MainActivity.this,
+                WristbandUtils.toast(ContactActivity.this,
                         "Device connected!"
                 );
             }
@@ -234,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements BleWrapperUiCallb
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                WristbandUtils.toast(MainActivity.this,
+                WristbandUtils.toast(ContactActivity.this,
                         "Device connected successfuly!"
                 );
             }
@@ -268,20 +228,84 @@ public class MainActivity extends AppCompatActivity implements BleWrapperUiCallb
                 // Show all the supported services and characteristics on the user interface.
                 displayGattServices(mBluetoothLeService.getSupportedGattServices());
             } else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                conn.display(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
-                System.out.println("Data1 "+ attributes.getDataString());
-                dte.setText("Temparature in Centigrade: "+attributes.getTemp_cen()
-                +"\n"+"Temparature in Farenhite: "+attributes.getTemp_frn()
-                +"\n"+"Battery Status: "+attributes.getBattery()
-                +"\n"+"Last Accessed: "+attributes.getDate());
+                conn.display_cntct(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+                System.out.println("XXXXXXX " + attributes.getAlrt_wr_mac_id()+" --->> "+attributes.getCntct_dt());
+                if (!attributes.getAlrt_wr_mac_id().matches("") && attributes.getAlrt_wr_mac_id().length() > 4) {
+                    loadLayout(attributes.getAlrt_wr_mac_id(), attributes.getCntct_dt());
+                }
             }
         }
     };
+
+    private void loadLayout(String mac_id,String dte) {
+            LinearLayout layout1 = new LinearLayout(this);
+            layout1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            layout1.setOrientation(LinearLayout.VERTICAL);
+
+            TextView tv4 = new TextView(this);
+            tv4.setText("-----------------------------------------------------------");
+            tv4.setTextColor(getResources().getColor(R.color.colorPrimary));
+            tv4.setTypeface(null, Typeface.BOLD);
+
+            LinearLayout.LayoutParams params4 = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            tv4.setLayoutParams(params4);
+
+            layout1.addView(tv4);//Add parent view
+
+            LinearLayout layout2 = new LinearLayout(this);
+
+            layout2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            layout2.setOrientation(LinearLayout.HORIZONTAL);
+            layout2.setWeightSum(2);
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            params.weight = 1.0f;
+            //tv1.setLayoutParams(params);
+
+            TextView tv2 = new TextView(this);
+            tv2.setTextColor(getResources().getColor(R.color.black));
+
+            LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            //tv1.getLayoutParams();
+            params1.weight = 1.0f;
+            tv2.setLayoutParams(params1);
+
+            DecimalFormat df = new DecimalFormat("#.00");
+            df.format(0.912385);
+
+            TextView tv3 = new TextView(this);
+            tv3.setText(dte);
+            tv3.setTextColor(getResources().getColor(R.color.black));
+
+            LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            tv3.getLayoutParams();
+            params2.weight = 1.0f;
+            tv3.setLayoutParams(params2);
+
+            tv2.setText(WristbandUtils.makeMacAddress(mac_id.toUpperCase()));
+
+            layout2.addView(tv3);
+            //layout2.addView(tv1);
+            layout2.addView(tv2);
+
+            layout1.addView(layout2);//Add parent view
+
+            llDynamicContent.addView(layout1);
+
+
+    }
+
     private void updateConnectionState(final String resourceId) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                WristbandUtils.toast(MainActivity.this,
+                WristbandUtils.toast(ContactActivity.this,
                         resourceId
                 );
             }

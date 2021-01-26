@@ -1,13 +1,30 @@
 package com.example.librryt19.Model;
 
 public class Attributes {
-    private static String dataString="";
-    private static String battery="0 %";
-    private static String date="NA";
-    private static String temp_cen="NA";
-    private static String temp_frn="NA";
+    private  String dataString="";
+    private  String battery="0 %";
+    private  String date="NA";
+    private  String temp_cen="NA";
+    private  String temp_frn="NA";
+    private  String alrt_wr_mac_id="";
+    private  String cntct_dt="";
 
-    public static String getDataString() {
+    public  String getAlrt_wr_mac_id() {
+        return alrt_wr_mac_id;
+    }
+
+    public  void setAlrt_wr_mac_id(String alrt_wr_mac_id) {
+        this.alrt_wr_mac_id = alrt_wr_mac_id;
+    }
+
+    public  String getCntct_dt() {
+        return cntct_dt;
+    }
+
+    public  void setCntct_dt(String cntct_dt) {
+        this.cntct_dt = cntct_dt;
+    }
+    public  String getDataString() {
         return dataString;
     }
 
@@ -15,7 +32,7 @@ public class Attributes {
         this.dataString = dataString;
     }
 
-    public static String getBattery() {
+    public  String getBattery() {
         return battery;
     }
 
@@ -23,7 +40,7 @@ public class Attributes {
         this.battery = battery;
     }
 
-    public static String getDate() {
+    public  String getDate() {
         return date;
     }
 
@@ -31,7 +48,7 @@ public class Attributes {
         this.date = date;
     }
 
-    public static String getTemp_cen() {
+    public  String getTemp_cen() {
         return temp_cen;
     }
 
@@ -39,7 +56,7 @@ public class Attributes {
         this.temp_cen = temp_cen;
     }
 
-    public static String getTemp_frn() {
+    public  String getTemp_frn() {
         return temp_frn;
     }
 

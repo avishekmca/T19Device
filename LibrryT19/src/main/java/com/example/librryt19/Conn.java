@@ -2,7 +2,11 @@ package com.example.librryt19;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 
 import com.example.librryt19.Commons.Commons;
@@ -25,11 +29,13 @@ public class Conn  {
     private String bat_stat="0";
     private String temp_cen="NA";
     private String temp_frhn="NA";
-    private Attributes attributes=new Attributes();
-    public Conn(Activity activity, String data, Bluetooth bluetooth) {
+    private Attributes attributes;
+    public Conn(Activity activity, String data, Bluetooth bluetooth,Attributes attributes) {
         this.activity = activity;
         this.bluetooth = bluetooth;
-        authConnetion(data);
+        this.attributes = attributes;
+        //if(!Commons.hasCon)
+            authConnetion(data);
     }
     public void authConnetion(final String data) {
         @SuppressLint("StaticFieldLeak")
@@ -151,5 +157,56 @@ public class Conn  {
             }
         }
     }
-    //***********************************    Retrive Data    ***********************************************
+    //***********************************    Retrive Contact Sync    ***********************************************
+    public void display_cntct(String data) {
+        if (data != null) {
+            if (!data.equalsIgnoreCase("")) {
+                try {
+                    String[] value = data.split("\r\n");
+                    for (int i = 0; i < value.length; i++) {
+                        try {
+                            String[] finalValue = value[i].split(",");
+                            if (finalValue[0].equalsIgnoreCase("$2020-07-21")) {
+                                continue;
+                            }
+                           // mDataField.setText(finalValue[2].replace("#", ""));
+                            String timeKey = finalValue[0].replace("$", "")
+                                    .replace("-", "")
+                                    + "" + finalValue[1].replace(":", "");
+                            timeKey = timeKey.substring(2, timeKey.length() - 2);
+                            int key = Integer.parseInt(timeKey);
+                            mapData.put(key,
+                                    finalValue[2].replace("#", "")
+                                            + "~" + finalValue[0].replace("$", " ")
+                                            + "\n "
+                                            + finalValue[1].replace(" ", " "));
+                        } catch (Exception e) {
+                        }
+                    }
+                    // Get Set of entries
+                    Set set = mapData.entrySet();
+                    // Get iterator
+                    Iterator it = set.iterator();
+                    // Show TreeMap elements
+                    System.out.println("TreeMap contains: ");
+                    int j=0;
+                    while (it.hasNext()) {
+                        if(j>9){
+                            break;
+                        }
+                        j++;
+                        Map.Entry pair = (Map.Entry) it.next();
+                        System.out.print("Key is: " + pair.getKey() + " and ");
+                        System.out.println("Value is: " + pair.getValue());
+                        String[] finalValue = (pair.getValue() + "").split("~");
+                        attributes.setAlrt_wr_mac_id(finalValue[0]);
+                        attributes.setCntct_dt(finalValue[1]);
+                    }
+                } catch (Exception e) {
+                    Log.v("error", e.toString());
+                }
+
+            }
+        }
+    }
 }

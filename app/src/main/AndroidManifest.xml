@@ -17,17 +17,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver
-            android:name="com.example.librryt19.brodcastreceiver.SensorRestarterBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:label="RestartServiceWhenStopped" />
-        <receiver
-            android:name="com.example.librryt19.brodcastreceiver.SensorRestarterBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:label="RestartServiceWhenStopped" />
+        <activity android:name=".ContactActivity">
 
+        </activity>
+        <receiver
+            android:name="com.example.librryt19.brodcastreceiver.SensorRestarterBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped" />
+        <receiver
+            android:name="com.example.librryt19.brodcastreceiver.SensorRestarterBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped" />
 
         <service
             android:name="com.example.librryt19.sensorservice.SensorService"
